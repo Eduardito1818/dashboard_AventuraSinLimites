@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Big Data - Aventura Sin Límites</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- PapaParse para leer CSV local -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'azul-aventura': '#0E4D92',
+            'azul-profundo': '#08366A',
+            'camello-safari': '#D89A3D',
+            'naranja-aventura': '#F07A24',
+            'verde-laguna': '#38B7A5',
+            'blanco-humo': '#F7F8FA',
+            'gris-carbon': '#222831',
+            'gris-moderno': '#6B7280',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-blanco-humo text-gris-carbon font-sans antialiased min-h-screen">
+
+  <!-- HEADER INSTITUCIONAL -->
+  <header class="bg-azul-profundo text-white shadow-lg py-4 px-8 flex justify-between items-center">
+    <div class="flex items-center space-x-4">
+      <img src="logo.png" alt="Aventura Sin Límites" class="h-14 w-auto bg-white p-1 rounded-lg shadow-sm" onerror="this.src='https://via.placeholder.com/60?text=LOGO'">
+      <div>
+        <h1 class="text-2xl font-bold tracking-wide">Aventura Sin Límites</h1>
+        <p class="text-xs text-verde-laguna font-medium">Panel de Inteligencia de Negocios y Big Data</p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-3">
+      <span class="text-sm text-gray-300">Fuente:</span>
+      <span class="bg-azul-aventura text-xs text-white px-3 py-1.5 rounded-lg border border-blue-400 font-mono">datos_aventura.csv</span>
+    </div>
+  </header>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="p-8 max-w-7xl mx-auto space-y-8">
+
+    <!-- SECCIÓN 1: TARJETAS DE KPIS CALCULADAS -->
+    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      
+      <div class="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-azul-aventura">
+        <p class="text-xs font-semibold text-gris-moderno uppercase tracking-wider">Ingresos Totales</p>
+        <h3 id="kpi-ingresos" class="text-3xl font-extrabold text-azul-profundo mt-2">Cargando...</h3>
+        <p class="text-xs text-verde-laguna font-semibold mt-2">Suma real de precios</p>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-naranja-aventura">
+        <p class="text-xs font-semibold text-gris-moderno uppercase tracking-wider">Reservas Registradas</p>
+        <h3 id="kpi-reservas" class="text-3xl font-extrabold text-gris-carbon mt-2">Cargando...</h3>
+        <p class="text-xs text-naranja-aventura font-semibold mt-2">Registros en Dataset</p>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-verde-laguna">
+        <p class="text-xs font-semibold text-gris-moderno uppercase tracking-wider">Método Principal</p>
+        <h3 id="kpi-metodo" class="text-3xl font-extrabold text-verde-laguna mt-2">Cargando...</h3>
+        <p class="text-xs text-gris-moderno mt-2">Mayor volumen de pagos</p>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-camello-safari">
+        <p class="text-xs font-semibold text-gris-moderno uppercase tracking-wider">Muestras OCR / NLP</p>
+        <h3 id="kpi-noestructurados" class="text-3xl font-extrabold text-camello-safari mt-2">Cargando...</h3>
+        <p class="text-xs text-verde-laguna font-semibold mt-2">Procesadas automáticamente</p>
+      </div>
+
+    </section>
+
+    <!-- SECCIÓN 2: GRÁFICOS DINÁMICOS -->
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <h2 class="text-lg font-bold text-azul-profundo mb-4">Top Paquetes y Full Days Solicitados</h2>
+        <div class="relative h-64">
+          <canvas id="chartDestinos"></canvas>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <h2 class="text-lg font-bold text-azul-profundo mb-4">Distribución por Método de Pago</h2>
+        <div class="relative h-64 flex justify-center">
+          <canvas id="chartPagos"></canvas>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- SECCIÓN 3: TABLA DE DATOS DEL CSV -->
+    <section class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <h2 class="text-lg font-bold text-azul-profundo">Muestra de Registros Procesados (OCR & NLP)</h2>
+          <p class="text-sm text-gris-moderno">Datos extraídos en tiempo real desde el archivo CSV</p>
+        </div>
+        <span id="badge-total" class="bg-azul-profundo text-white text-xs font-bold px-3 py-1 rounded-full">0 filas</span>
+      </div>
+
+      <div class="overflow-x-auto max-h-80">
+        <table class="w-full text-left border-collapse">
+          <thead class="sticky top-0 bg-blanco-humo shadow-sm">
+            <tr class="text-azul-profundo text-xs uppercase font-semibold border-b border-gray-200">
+              <th class="p-3">Paquete / Tour</th>
+              <th class="p-3">Precio</th>
+              <th class="p-3">Método Pago</th>
+              <th class="p-3">Guía</th>
+              <th class="p-3">Procesamiento</th>
+              <th class="p-3">Resultado Extraído</th>
+              <th class="p-3">Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-body" class="divide-y divide-gray-100 text-sm">
+            <tr><td colspan="7" class="p-4 text-center text-gris-moderno">Cargando datos desde datos_aventura.csv...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- LÓGICA DE PROCESAMIENTO Y LECTURA DE CSV -->
+  <script>
+    const colores = {
+      azulAventura: '#0E4D92',
+      azulProfundo: '#08366A',
+      camelloSafari: '#D89A3D',
+      naranjaAventura: '#F07A24',
+      verdeLaguna: '#38B7A5',
+      grisModerno: '#6B7280'
+    };
+
+    let chartDestinosInstance = null;
+    let chartPagosInstance = null;
+
+    // Leer el CSV al cargar
+    Papa.parse('datos_aventura.csv', {
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      complete: function(results) {
+        procesarDatos(results.data);
+      },
+      error: function(err) {
+        console.error("Error al leer el CSV:", err);
+      }
+    });
+
+    function procesarDatos(data) {
+      document.getElementById('badge-total').innerText = `${data.length} registros`;
+      document.getElementById('kpi-reservas').innerText = data.length;
+      document.getElementById('kpi-noestructurados').innerText = data.length;
+
+      // 1. Calcular Ingresos Totales y Conteo de Métodos / Paquetes
+      let totalIngresos = 0;
+      const metodosConteo = {};
+      const paquetesConteo = {};
+
+      const tbody = document.getElementById('tabla-body');
+      tbody.innerHTML = '';
+
+      data.forEach((row, index) => {
+        // Limpiar precio
+        let precioNum = 0;
+        if (row.precio_soles) {
+          const limpio = row.precio_soles.toString().replace(/[^0-9.-]+/g, "");
+          precioNum = parseFloat(limpio) || 0;
+        }
+        totalIngresos += precioNum;
+
+        // Conteo Métodos
+        const metodo = row.metodo_pago || 'Otro';
+        metodosConteo[metodo] = (metodosConteo[metodo] || 0) + 1;
+
+        // Conteo Paquetes
+        const paquete = row.paquete_tour || 'Otro';
+        paquetesConteo[paquete] = (paquetesConteo[paquete] || 0) + 1;
+
+        // Rellenar primeros 15 registros en la tabla
+        if (index < 15) {
+          const tr = document.createElement('tr');
+          tr.className = 'hover:bg-gray-50';
+          tr.innerHTML = `
+            <td class="p-3 font-semibold text-azul-aventura">${row.paquete_tour || '-'}</td>
+            <td class="p-3 font-medium">S/ ${precioNum.toFixed(2)}</td>
+            <td class="p-3">${row.metodo_pago || '-'}</td>
+            <td class="p-3 text-xs">${row.guia_asignado || '-'}</td>
+            <td class="p-3"><span class="bg-blue-100 text-azul-aventura text-xs font-semibold px-2 py-1 rounded">${row.procesamiento_aplicado || 'OCR/NLP'}</span></td>
+            <td class="p-3 text-xs max-w-xs truncate">${row.resultado_extraido || '-'}</td>
+            <td class="p-3"><span class="bg-green-100 text-verde-laguna text-xs font-bold px-2 py-1 rounded">${row.estado_procesamiento || 'Validado'}</span></td>
+          `;
+          tbody.appendChild(tr);
+        }
+      });
+
+      // Actualizar KPI Ingresos
+      document.getElementById('kpi-ingresos').innerText = `S/ ${totalIngresos.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
+
+      // Obtener método principal
+      const metodoTop = Object.keys(metodosConteo).reduce((a, b) => metodosConteo[a] > metodosConteo[b] ? a : b, 'Yape');
+      document.getElementById('kpi-metodo').innerText = metodoTop;
+
+      // Renderizar Gráficos
+      renderizarGraficos(paquetesConteo, metodosConteo);
+    }
+
+    function renderizarGraficos(paquetesMap, metodosMap) {
+      // Gráfico Destinos
+      const ctxDestinos = document.getElementById('chartDestinos').getContext('2d');
+      if (chartDestinosInstance) chartDestinosInstance.destroy();
+      chartDestinosInstance = new Chart(ctxDestinos, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(paquetesMap),
+          datasets: [{
+            label: 'Reservas',
+            data: Object.values(paquetesMap),
+            backgroundColor: [colores.azulAventura, colores.naranjaAventura, colores.verdeLaguna, colores.camelloSafari, colores.azulProfundo],
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+
+      // Gráfico Pagos
+      const ctxPagos = document.getElementById('chartPagos').getContext('2d');
+      if (chartPagosInstance) chartPagosInstance.destroy();
+      chartPagosInstance = new Chart(ctxPagos, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(metodosMap),
+          datasets: [{
+            data: Object.values(metodosMap),
+            backgroundColor: [colores.verdeLaguna, colores.camelloSafari, colores.azulAventura, colores.naranjaAventura]
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom' } }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
