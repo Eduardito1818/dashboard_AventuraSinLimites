@@ -32,7 +32,7 @@
 </head>
 <body class="bg-blanco-humo text-gris-carbon font-sans antialiased min-h-screen">
 
-  <!-- HEADER INSTITUCIONAL -->
+  <!-- HEADER INSTITUCIONAL CON FILTRO DESPLEGABLE -->
   <header class="bg-azul-profundo text-white shadow-lg py-4 px-8 flex justify-between items-center">
     <div class="flex items-center space-x-4">
       <img src="logo.png" alt="Aventura Sin Límites" class="h-14 w-auto bg-white p-1 rounded-lg shadow-sm" onerror="this.src='https://via.placeholder.com/60?text=LOGO'">
@@ -42,8 +42,17 @@
       </div>
     </div>
     <div class="flex items-center space-x-3">
-      <span class="text-sm text-gray-300">Fuente:</span>
-      <span class="bg-azul-aventura text-xs text-white px-3 py-1.5 rounded-lg border border-blue-400 font-mono">datos_aventura.csv</span>
+      <span class="text-sm text-gray-300">Filtrar Rango:</span>
+      <select id="select-rango" class="bg-azul-aventura text-white text-xs font-semibold rounded-lg p-2 border border-blue-400 focus:outline-none cursor-pointer">
+        <option value="todos">Ver Todo el Año (150 registros)</option>
+        <option value="t2">Trimestre 2 (Mayo - Junio)</option>
+        <option value="t3">Trimestre 3 (Julio - Septiembre)</option>
+        <option value="mayo">Mayo 2026</option>
+        <option value="junio">Junio 2026</option>
+        <option value="julio">Julio 2026</option>
+        <option value="agosto">Agosto 2026</option>
+        <option value="septiembre">Septiembre 2026</option>
+      </select>
     </div>
   </header>
 
@@ -130,7 +139,7 @@
 
   </main>
 
-  <!-- LÓGICA DE PROCESAMIENTO Y LECTURA DE CSV -->
+  <!-- LÓGICA DE PROCESAMIENTO Y FILTRADO DINÁMICO DE CSV -->
   <script>
     const colores = {
       azulAventura: '#0E4D92',
@@ -141,6 +150,7 @@
       grisModerno: '#6B7280'
     };
 
+    let datasetGlobal = [];
     let chartDestinosInstance = null;
     let chartPagosInstance = null;
 
@@ -150,25 +160,62 @@
       header: true,
       skipEmptyLines: true,
       complete: function(results) {
-        procesarDatos(results.data);
+        datasetGlobal = results.data;
+        
+        // Escuchar el evento del filtro desplegable
+        const selectFiltro = document.getElementById('select-rango');
+        if (selectFiltro) {
+          selectFiltro.addEventListener('change', (e) => aplicarFiltro(e.target.value));
+        }
+        
+        // Mostrar todos los registros por defecto
+        aplicarFiltro('todos');
       },
       error: function(err) {
         console.error("Error al leer el CSV:", err);
       }
     });
 
+    function aplicarFiltro(criterio) {
+      let datosFiltrados = datasetGlobal;
+
+      // Filtrar evaluando el campo fecha_viaje (formato DD/MM/YYYY)
+      if (criterio === 'mayo') {
+        datosFiltrados = datasetGlobal.filter(r => r.fecha_viaje && r.fecha_viaje.includes('/05/'));
+      } else if (criterio === 'junio') {
+        datosFiltrados = datasetGlobal.filter(r => r.fecha_viaje && r.fecha_viaje.includes('/06/'));
+      } else if (criterio === 'julio') {
+        datosFiltrados = datasetGlobal.filter(r => r.fecha_viaje && r.fecha_viaje.includes('/07/'));
+      } else if (criterio === 'agosto') {
+        datosFiltrados = datasetGlobal.filter(r => r.fecha_viaje && r.fecha_viaje.includes('/08/'));
+      } else if (criterio === 'septiembre') {
+        datosFiltrados = datasetGlobal.filter(r => r.fecha_viaje && r.fecha_viaje.includes('/09/'));
+      } else if (criterio === 't2') { 
+        // Trimestre 2: Mayo y Junio
+        datosFiltrados = datasetGlobal.filter(r => r.fecha_viaje && (r.fecha_viaje.includes('/05/') || r.fecha_viaje.includes('/06/')));
+      } else if (criterio === 't3') { 
+        // Trimestre 3: Julio, Agosto y Septiembre
+        datosFiltrados = datasetGlobal.filter(r => r.fecha_viaje && (r.fecha_viaje.includes('/07/') || r.fecha_viaje.includes('/08/') || r.fecha_viaje.includes('/09/')));
+      }
+
+      procesarDatos(datosFiltrados);
+    }
+
     function procesarDatos(data) {
       document.getElementById('badge-total').innerText = `${data.length} registros`;
       document.getElementById('kpi-reservas').innerText = data.length;
       document.getElementById('kpi-noestructurados').innerText = data.length;
 
-      // 1. Calcular Ingresos Totales y Conteo de Métodos / Paquetes
       let totalIngresos = 0;
       const metodosConteo = {};
       const paquetesConteo = {};
 
       const tbody = document.getElementById('tabla-body');
       tbody.innerHTML = '';
+
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-gris-moderno">No hay registros para el periodo seleccionado.</td></tr>';
+      }
 
       data.forEach((row, index) => {
         // Limpiar precio
@@ -208,10 +255,12 @@
       document.getElementById('kpi-ingresos').innerText = `S/ ${totalIngresos.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
 
       // Obtener método principal
-      const metodoTop = Object.keys(metodosConteo).reduce((a, b) => metodosConteo[a] > metodosConteo[b] ? a : b, 'Yape');
+      const metodoTop = Object.keys(metodosConteo).length > 0 
+        ? Object.keys(metodosConteo).reduce((a, b) => metodosConteo[a] > metodosConteo[b] ? a : b)
+        : '-';
       document.getElementById('kpi-metodo').innerText = metodoTop;
 
-      // Renderizar Gráficos
+      // Renderizar Gráficos con datos filtrados
       renderizarGraficos(paquetesConteo, metodosConteo);
     }
 
