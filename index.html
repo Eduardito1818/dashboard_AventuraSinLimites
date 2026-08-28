@@ -32,7 +32,7 @@
 </head>
 <body class="bg-blanco-humo text-gris-carbon font-sans antialiased min-h-screen">
 
-  <!-- HEADER INSTITUCIONAL CON FILTRO DESPLEGABLE -->
+  <!-- HEADER INSTITUCIONAL -->
   <header class="bg-azul-profundo text-white shadow-lg py-4 px-8 flex justify-between items-center">
     <div class="flex items-center space-x-4">
       <img src="logo.png" alt="Aventura Sin Límites" class="h-14 w-auto bg-white p-1 rounded-lg shadow-sm" onerror="this.src='https://via.placeholder.com/60?text=LOGO'">
@@ -88,9 +88,10 @@
 
     </section>
 
-    <!-- SECCIÓN 2: GRÁFICOS DINÁMICOS -->
+    <!-- SECCIÓN 2: GRÁFICOS DINÁMICOS Y COMPARATIVOS (4 BLOQUES) -->
     <section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
       
+      <!-- Gráfico 1: Top Paquetes -->
       <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <h2 class="text-lg font-bold text-azul-profundo mb-4">Top Paquetes y Full Days Solicitados</h2>
         <div class="relative h-64">
@@ -98,10 +99,27 @@
         </div>
       </div>
 
+      <!-- Gráfico 2: Métodos de Pago -->
       <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <h2 class="text-lg font-bold text-azul-profundo mb-4">Distribución por Método de Pago</h2>
         <div class="relative h-64 flex justify-center">
           <canvas id="chartPagos"></canvas>
+        </div>
+      </div>
+
+      <!-- Gráfico 3: Tendencia de Ingresos -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <h2 class="text-lg font-bold text-azul-profundo mb-4">Tendencia de Ingresos Mensuales (S/)</h2>
+        <div class="relative h-64">
+          <canvas id="chartTendencia"></canvas>
+        </div>
+      </div>
+
+      <!-- Gráfico 4: Asignación a Guías -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <h2 class="text-lg font-bold text-azul-profundo mb-4">Asignación Operativa de Guías Turísticos</h2>
+        <div class="relative h-64">
+          <canvas id="chartGuias"></canvas>
         </div>
       </div>
 
@@ -139,7 +157,7 @@
 
   </main>
 
-  <!-- LÓGICA DE PROCESAMIENTO Y FILTRADO DINÁMICO DE CSV -->
+  <!-- LÓGICA DE PROCESAMIENTO Y FILTRADO DINÁMICO CON 4 GRÁFICOS -->
   <script>
     const colores = {
       azulAventura: '#0E4D92',
@@ -153,8 +171,9 @@
     let datasetGlobal = [];
     let chartDestinosInstance = null;
     let chartPagosInstance = null;
+    let chartTendenciaInstance = null;
+    let chartGuiasInstance = null;
 
-    // Leer el CSV al cargar
     Papa.parse('datos_aventura.csv', {
       download: true,
       header: true,
@@ -162,13 +181,11 @@
       complete: function(results) {
         datasetGlobal = results.data;
         
-        // Escuchar el evento del filtro desplegable
         const selectFiltro = document.getElementById('select-rango');
         if (selectFiltro) {
           selectFiltro.addEventListener('change', (e) => aplicarFiltro(e.target.value));
         }
         
-        // Mostrar todos los registros por defecto
         aplicarFiltro('todos');
       },
       error: function(err) {
@@ -179,7 +196,6 @@
     function aplicarFiltro(criterio) {
       let datosFiltrados = datasetGlobal;
 
-      // Filtrar evaluando el campo fecha_viaje (formato DD/MM/YYYY)
       if (criterio === 'mayo') {
         datosFiltrados = datasetGlobal.filter(r => r.fecha_viaje && r.fecha_viaje.includes('/05/'));
       } else if (criterio === 'junio') {
@@ -191,10 +207,8 @@
       } else if (criterio === 'septiembre') {
         datosFiltrados = datasetGlobal.filter(r => r.fecha_viaje && r.fecha_viaje.includes('/09/'));
       } else if (criterio === 't2') { 
-        // Trimestre 2: Mayo y Junio
         datosFiltrados = datasetGlobal.filter(r => r.fecha_viaje && (r.fecha_viaje.includes('/05/') || r.fecha_viaje.includes('/06/')));
       } else if (criterio === 't3') { 
-        // Trimestre 3: Julio, Agosto y Septiembre
         datosFiltrados = datasetGlobal.filter(r => r.fecha_viaje && (r.fecha_viaje.includes('/07/') || r.fecha_viaje.includes('/08/') || r.fecha_viaje.includes('/09/')));
       }
 
@@ -209,16 +223,13 @@
       let totalIngresos = 0;
       const metodosConteo = {};
       const paquetesConteo = {};
+      const guiasConteo = {};
+      const ingresosMensuales = { 'Mayo': 0, 'Junio': 0, 'Julio': 0, 'Agosto': 0, 'Septiembre': 0 };
 
       const tbody = document.getElementById('tabla-body');
       tbody.innerHTML = '';
 
-      if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-gris-moderno">No hay registros para el periodo seleccionado.</td></tr>';
-      }
-
       data.forEach((row, index) => {
-        // Limpiar precio
         let precioNum = 0;
         if (row.precio_soles) {
           const limpio = row.precio_soles.toString().replace(/[^0-9.-]+/g, "");
@@ -226,13 +237,26 @@
         }
         totalIngresos += precioNum;
 
-        // Conteo Métodos
+        // Métodos
         const metodo = row.metodo_pago || 'Otro';
         metodosConteo[metodo] = (metodosConteo[metodo] || 0) + 1;
 
-        // Conteo Paquetes
+        // Paquetes
         const paquete = row.paquete_tour || 'Otro';
         paquetesConteo[paquete] = (paquetesConteo[paquete] || 0) + 1;
+
+        // Guías
+        const guia = row.guia_asignado || 'Sin Asignar';
+        guiasConteo[guia] = (guiasConteo[guia] || 0) + 1;
+
+        // Acumular Ingresos por Mes
+        if (row.fecha_viaje) {
+          if (row.fecha_viaje.includes('/05/')) ingresosMensuales['Mayo'] += precioNum;
+          else if (row.fecha_viaje.includes('/06/')) ingresosMensuales['Junio'] += precioNum;
+          else if (row.fecha_viaje.includes('/07/')) ingresosMensuales['Julio'] += precioNum;
+          else if (row.fecha_viaje.includes('/08/')) ingresosMensuales['Agosto'] += precioNum;
+          else if (row.fecha_viaje.includes('/09/')) ingresosMensuales['Septiembre'] += precioNum;
+        }
 
         // Rellenar primeros 15 registros en la tabla
         if (index < 15) {
@@ -251,21 +275,18 @@
         }
       });
 
-      // Actualizar KPI Ingresos
       document.getElementById('kpi-ingresos').innerText = `S/ ${totalIngresos.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
 
-      // Obtener método principal
       const metodoTop = Object.keys(metodosConteo).length > 0 
         ? Object.keys(metodosConteo).reduce((a, b) => metodosConteo[a] > metodosConteo[b] ? a : b)
         : '-';
       document.getElementById('kpi-metodo').innerText = metodoTop;
 
-      // Renderizar Gráficos con datos filtrados
-      renderizarGraficos(paquetesConteo, metodosConteo);
+      renderizarGraficos(paquetesConteo, metodosConteo, ingresosMensuales, guiasConteo);
     }
 
-    function renderizarGraficos(paquetesMap, metodosMap) {
-      // Gráfico Destinos
+    function renderizarGraficos(paquetesMap, metodosMap, ingresosMap, guiasMap) {
+      // 1. Gráfico Destinos
       const ctxDestinos = document.getElementById('chartDestinos').getContext('2d');
       if (chartDestinosInstance) chartDestinosInstance.destroy();
       chartDestinosInstance = new Chart(ctxDestinos, {
@@ -279,15 +300,10 @@
             borderRadius: 6
           }]
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true } }
-        }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
       });
 
-      // Gráfico Pagos
+      // 2. Gráfico Pagos
       const ctxPagos = document.getElementById('chartPagos').getContext('2d');
       if (chartPagosInstance) chartPagosInstance.destroy();
       chartPagosInstance = new Chart(ctxPagos, {
@@ -299,11 +315,45 @@
             backgroundColor: [colores.verdeLaguna, colores.camelloSafari, colores.azulAventura, colores.naranjaAventura]
           }]
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { position: 'bottom' } }
-        }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+      });
+
+      // 3. Gráfico Tendencia
+      const ctxTendencia = document.getElementById('chartTendencia').getContext('2d');
+      if (chartTendenciaInstance) chartTendenciaInstance.destroy();
+      chartTendenciaInstance = new Chart(ctxTendencia, {
+        type: 'line',
+        data: {
+          labels: Object.keys(ingresosMap),
+          datasets: [{
+            label: 'Ingresos (S/)',
+            data: Object.values(ingresosMap),
+            borderColor: colores.azulAventura,
+            backgroundColor: 'rgba(14, 77, 146, 0.1)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 5,
+            pointBackgroundColor: colores.naranjaAventura
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+      });
+
+      // 4. Gráfico Guías
+      const ctxGuias = document.getElementById('chartGuias').getContext('2d');
+      if (chartGuiasInstance) chartGuiasInstance.destroy();
+      chartGuiasInstance = new Chart(ctxGuias, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(guiasMap),
+          datasets: [{
+            label: 'Tours Asignados',
+            data: Object.values(guiasMap),
+            backgroundColor: colores.verdeLaguna,
+            borderRadius: 4
+          }]
+        },
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true } } }
       });
     }
   </script>
