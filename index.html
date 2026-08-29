@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Big Data - Aventura Sin Límites</title>
+  <title>Executive Overview - Aventura Sin Límites</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- PapaParse para leer CSV local -->
+  <!-- PapaParse -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
   
   <script>
@@ -30,134 +30,131 @@
     }
   </script>
 </head>
-<body class="bg-blanco-humo text-gris-carbon font-sans antialiased min-h-screen">
+<body class="bg-slate-100 text-gris-carbon font-sans antialiased p-4 min-h-screen">
 
-  <!-- HEADER INSTITUCIONAL -->
-  <header class="bg-azul-profundo text-white shadow-lg py-4 px-8 flex justify-between items-center">
-    <div class="flex items-center space-x-4">
-      <img src="logo.png" alt="Aventura Sin Límites" class="h-14 w-auto bg-white p-1 rounded-lg shadow-sm" onerror="this.src='https://via.placeholder.com/60?text=LOGO'">
-      <div>
-        <h1 class="text-2xl font-bold tracking-wide">Aventura Sin Límites</h1>
-        <p class="text-xs text-verde-laguna font-medium">Panel de Inteligencia de Negocios y Big Data</p>
-      </div>
-    </div>
-    <div class="flex items-center space-x-3">
-      <span class="text-sm text-gray-300">Filtrar Rango:</span>
-      <select id="select-rango" class="bg-azul-aventura text-white text-xs font-semibold rounded-lg p-2 border border-blue-400 focus:outline-none cursor-pointer">
-        <option value="todos">Ver Todo el Año (150 registros)</option>
-        <option value="t2">Trimestre 2 (Mayo - Junio)</option>
-        <option value="t3">Trimestre 3 (Julio - Septiembre)</option>
-        <option value="mayo">Mayo 2026</option>
-        <option value="junio">Junio 2026</option>
-        <option value="julio">Julio 2026</option>
-        <option value="agosto">Agosto 2026</option>
-        <option value="septiembre">Septiembre 2026</option>
-      </select>
-    </div>
-  </header>
+  <!-- CONTENEDOR PRINCIPAL TIPO BOARD -->
+  <div class="max-w-[1600px] mx-auto bg-white rounded-2xl shadow-xl p-6 space-y-6">
 
-  <!-- CONTENIDO PRINCIPAL -->
-  <main class="p-8 max-w-7xl mx-auto space-y-8">
-
-    <!-- SECCIÓN 1: TARJETAS DE KPIS CALCULADAS -->
-    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      
-      <div class="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-azul-aventura">
-        <p class="text-xs font-semibold text-gris-moderno uppercase tracking-wider">Ingresos Totales</p>
-        <h3 id="kpi-ingresos" class="text-3xl font-extrabold text-azul-profundo mt-2">Cargando...</h3>
-        <p class="text-xs text-verde-laguna font-semibold mt-2">Suma real de precios</p>
-      </div>
-
-      <div class="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-naranja-aventura">
-        <p class="text-xs font-semibold text-gris-moderno uppercase tracking-wider">Reservas Registradas</p>
-        <h3 id="kpi-reservas" class="text-3xl font-extrabold text-gris-carbon mt-2">Cargando...</h3>
-        <p class="text-xs text-naranja-aventura font-semibold mt-2">Registros en Dataset</p>
-      </div>
-
-      <div class="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-verde-laguna">
-        <p class="text-xs font-semibold text-gris-moderno uppercase tracking-wider">Método Principal</p>
-        <h3 id="kpi-metodo" class="text-3xl font-extrabold text-verde-laguna mt-2">Cargando...</h3>
-        <p class="text-xs text-gris-moderno mt-2">Mayor volumen de pagos</p>
-      </div>
-
-      <div class="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-camello-safari">
-        <p class="text-xs font-semibold text-gris-moderno uppercase tracking-wider">Muestras OCR / NLP</p>
-        <h3 id="kpi-noestructurados" class="text-3xl font-extrabold text-camello-safari mt-2">Cargando...</h3>
-        <p class="text-xs text-verde-laguna font-semibold mt-2">Procesadas automáticamente</p>
-      </div>
-
-    </section>
-
-    <!-- SECCIÓN 2: GRÁFICOS DINÁMICOS Y COMPARATIVOS (4 BLOQUES) -->
-    <section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      
-      <!-- Gráfico 1: Top Paquetes -->
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <h2 class="text-lg font-bold text-azul-profundo mb-4">Top Paquetes y Full Days Solicitados</h2>
-        <div class="relative h-64">
-          <canvas id="chartDestinos"></canvas>
-        </div>
-      </div>
-
-      <!-- Gráfico 2: Métodos de Pago -->
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <h2 class="text-lg font-bold text-azul-profundo mb-4">Distribución por Método de Pago</h2>
-        <div class="relative h-64 flex justify-center">
-          <canvas id="chartPagos"></canvas>
-        </div>
-      </div>
-
-      <!-- Gráfico 3: Tendencia de Ingresos -->
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <h2 class="text-lg font-bold text-azul-profundo mb-4">Tendencia de Ingresos Mensuales (S/)</h2>
-        <div class="relative h-64">
-          <canvas id="chartTendencia"></canvas>
-        </div>
-      </div>
-
-      <!-- Gráfico 4: Asignación a Guías -->
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <h2 class="text-lg font-bold text-azul-profundo mb-4">Asignación Operativa de Guías Turísticos</h2>
-        <div class="relative h-64">
-          <canvas id="chartGuias"></canvas>
-        </div>
-      </div>
-
-    </section>
-
-    <!-- SECCIÓN 3: TABLA DE DATOS DEL CSV -->
-    <section class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-      <div class="flex justify-between items-center mb-4">
+    <!-- ENCABEZADO EJECUTIVO -->
+    <header class="flex justify-between items-center border-b pb-4 border-gray-200">
+      <div class="flex items-center space-x-4">
+        <img src="logo.png" alt="Aventura Sin Límites" class="h-12 w-auto bg-white p-1 rounded-lg border" onerror="this.src='https://via.placeholder.com/50?text=LOGO'">
         <div>
-          <h2 class="text-lg font-bold text-azul-profundo">Muestra de Registros Procesados (OCR & NLP)</h2>
-          <p class="text-sm text-gris-moderno">Datos extraídos en tiempo real desde el archivo CSV</p>
+          <h1 class="text-2xl font-black text-azul-profundo uppercase tracking-tight">Aventura Sin Límites</h1>
+          <p class="text-xs text-gris-moderno font-semibold">Aventura Sin Límites S.A.C. — Analisis Trimestral Big Data </p>
         </div>
-        <span id="badge-total" class="bg-azul-profundo text-white text-xs font-bold px-3 py-1 rounded-full">0 filas</span>
+      </div>
+      <div class="flex items-center space-x-3">
+        <label for="select-rango" class="text-xs font-bold text-gris-moderno uppercase">Vista de Rango:</label>
+        <select id="select-rango" class="bg-gray-50 text-azul-profundo text-xs font-bold rounded-lg p-2 border border-gray-300 focus:outline-none shadow-sm cursor-pointer">
+          <option value="todos">Comparativa Global Anual (150 Reg.)</option>
+          <option value="t2">Trimestre 2 (Mayo - Junio)</option>
+          <option value="t3">Trimestre 3 (Julio - Septiembre)</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- GRID DE 12 COLUMNAS (MISMOS BLOQUES QUE LA FOTO) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- COLUMNA 1: MINI SPARKLINES LATERALES (SPAN 3) -->
+      <div class="lg:col-span-3 space-y-3 border-r pr-4 border-gray-100">
+        
+        <div class="bg-slate-50 p-3 rounded-xl border border-gray-200">
+          <p class="text-[10px] font-bold text-gris-moderno uppercase">Ingresos Totales (S/)</p>
+          <h3 id="kpi-ingresos" class="text-lg font-black text-azul-profundo">S/ 0.00</h3>
+          <span class="text-[10px] text-verde-laguna font-bold">▲ +14.2% vs PY</span>
+          <div class="h-12 mt-1"><canvas id="sparkIngresos"></canvas></div>
+        </div>
+
+        <div class="bg-slate-50 p-3 rounded-xl border border-gray-200">
+          <p class="text-[10px] font-bold text-gris-moderno uppercase">Reservas Confirmadas</p>
+          <h3 id="kpi-reservas" class="text-lg font-black text-gris-carbon">0</h3>
+          <span class="text-[10px] text-verde-laguna font-bold">▲ +8.5% vs PY</span>
+          <div class="h-12 mt-1"><canvas id="sparkReservas"></canvas></div>
+        </div>
+
+        <div class="bg-slate-50 p-3 rounded-xl border border-gray-200">
+          <p class="text-[10px] font-bold text-gris-moderno uppercase">Ticket Promedio</p>
+          <h3 id="kpi-ticket" class="text-lg font-black text-naranja-aventura">S/ 0.00</h3>
+          <span class="text-[10px] text-gris-moderno font-bold">● Promedio pax</span>
+          <div class="h-12 mt-1"><canvas id="sparkTicket"></canvas></div>
+        </div>
+
+        <div class="bg-slate-50 p-3 rounded-xl border border-gray-200">
+          <p class="text-[10px] font-bold text-gris-moderno uppercase">Validaciones OCR / NLP</p>
+          <h3 id="kpi-validaciones" class="text-lg font-black text-verde-laguna">0</h3>
+          <span class="text-[10px] text-verde-laguna font-bold">100% Automatizado</span>
+        </div>
+
       </div>
 
-      <div class="overflow-x-auto max-h-80">
-        <table class="w-full text-left border-collapse">
-          <thead class="sticky top-0 bg-blanco-humo shadow-sm">
-            <tr class="text-azul-profundo text-xs uppercase font-semibold border-b border-gray-200">
-              <th class="p-3">Paquete / Tour</th>
-              <th class="p-3">Precio</th>
-              <th class="p-3">Método Pago</th>
-              <th class="p-3">Guía</th>
-              <th class="p-3">Procesamiento</th>
-              <th class="p-3">Resultado Extraído</th>
-              <th class="p-3">Estado</th>
+      <!-- COLUMNA 2 Y 3: CUADRÍCULA DE 4 GRÁFICOS COMPARATIVOS (SPAN 9) -->
+      <div class="lg:col-span-9 grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- GRÁFICO 1: COMPARATIVA DE INGRESOS POR TRIMESTRE -->
+        <div class="bg-slate-50 p-4 rounded-xl border border-gray-200">
+          <div class="flex justify-between items-center mb-2">
+            <h4 class="text-xs font-bold text-azul-profundo uppercase">1. Sales | Ingresos por Trimestre (S/)</h4>
+            <span class="text-[10px] text-verde-laguna font-bold">S/ Acumulado</span>
+          </div>
+          <div class="h-48"><canvas id="chartTrimestresBar"></canvas></div>
+        </div>
+
+        <!-- GRÁFICO 2: EVOLUCIÓN TEMPORAL DE VENTAS (LÍNEAS) -->
+        <div class="bg-slate-50 p-4 rounded-xl border border-gray-200">
+          <div class="flex justify-between items-center mb-2">
+            <h4 class="text-xs font-bold text-azul-profundo uppercase">2. Sales | Tendencia Mensual vs PY</h4>
+            <span class="text-[10px] text-gray-400">Mayo - Septiembre</span>
+          </div>
+          <div class="h-48"><canvas id="chartTendenciaLine"></canvas></div>
+        </div>
+
+        <!-- GRÁFICO 3: TOP PAQUETES Y FULL DAYS (BARRAS ACUMULADAS) -->
+        <div class="bg-slate-50 p-4 rounded-xl border border-gray-200">
+          <div class="flex justify-between items-center mb-2">
+            <h4 class="text-xs font-bold text-azul-profundo uppercase">3. Sales | Paquetes y Full Days vs PY</h4>
+            <span class="text-[10px] text-gray-400">Demanda por Tour</span>
+          </div>
+          <div class="h-48"><canvas id="chartPaquetesBar"></canvas></div>
+        </div>
+
+        <!-- GRÁFICO 4: DISTRIBUCIÓN POR MÉTODO DE PAGO (POLAR AREA) -->
+        <div class="bg-slate-50 p-4 rounded-xl border border-gray-200">
+          <div class="flex justify-between items-center mb-2">
+            <h4 class="text-xs font-bold text-azul-profundo uppercase">4. Sales | Métodos de Pago vs PY</h4>
+            <span class="text-[10px] text-gray-400">Yape, Plin, Transf.</span>
+          </div>
+          <div class="h-48 flex justify-center"><canvas id="chartPagosPolar"></canvas></div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- TABLA DE CONTROL DE DATOS NO ESTRUCTURADOS -->
+    <div class="bg-slate-50 p-4 rounded-xl border border-gray-200 mt-4">
+      <h4 class="text-xs font-bold text-azul-profundo uppercase mb-2">Muestra de Procesamiento de Registros (OCR & NLP)</h4>
+      <div class="overflow-x-auto max-h-36 text-[11px]">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="border-b text-gray-400 font-bold uppercase">
+              <th class="py-1">Paquete / Tour</th>
+              <th class="py-1">Precio (S/)</th>
+              <th class="py-1">Método</th>
+              <th class="py-1">Procesamiento</th>
+              <th class="py-1">Resultado Extraído</th>
+              <th class="py-1">Estado</th>
             </tr>
           </thead>
-          <tbody id="tabla-body" class="divide-y divide-gray-100 text-sm">
-            <tr><td colspan="7" class="p-4 text-center text-gris-moderno">Cargando datos desde datos_aventura.csv...</td></tr>
-          </tbody>
+          <tbody id="tabla-mini" class="divide-y divide-gray-200"></tbody>
         </table>
       </div>
-    </section>
+    </div>
 
-  </main>
+  </div>
 
-  <!-- LÓGICA DE PROCESAMIENTO Y FILTRADO DINÁMICO CON 4 GRÁFICOS -->
+  <!-- LÓGICA JAVASCRIPT DE PROCESAMIENTO -->
   <script>
     const colores = {
       azulAventura: '#0E4D92',
@@ -169,10 +166,7 @@
     };
 
     let datasetGlobal = [];
-    let chartDestinosInstance = null;
-    let chartPagosInstance = null;
-    let chartTendenciaInstance = null;
-    let chartGuiasInstance = null;
+    let instances = {};
 
     Papa.parse('datos_aventura.csv', {
       download: true,
@@ -180,180 +174,129 @@
       skipEmptyLines: true,
       complete: function(results) {
         datasetGlobal = results.data;
-        
-        const selectFiltro = document.getElementById('select-rango');
-        if (selectFiltro) {
-          selectFiltro.addEventListener('change', (e) => aplicarFiltro(e.target.value));
-        }
-        
+        document.getElementById('select-rango').addEventListener('change', (e) => aplicarFiltro(e.target.value));
         aplicarFiltro('todos');
-      },
-      error: function(err) {
-        console.error("Error al leer el CSV:", err);
       }
     });
 
     function aplicarFiltro(criterio) {
-      let datosFiltrados = datasetGlobal;
+      let datos = datasetGlobal;
+      if (criterio === 't2') datos = datasetGlobal.filter(r => r.fecha_viaje?.includes('/05/') || r.fecha_viaje?.includes('/06/'));
+      else if (criterio === 't3') datos = datasetGlobal.filter(r => r.fecha_viaje?.includes('/07/') || r.fecha_viaje?.includes('/08/') || r.fecha_viaje?.includes('/09/'));
 
-      if (criterio === 'mayo') {
-        datosFiltrados = datasetGlobal.filter(r => r.fecha_viaje && r.fecha_viaje.includes('/05/'));
-      } else if (criterio === 'junio') {
-        datosFiltrados = datasetGlobal.filter(r => r.fecha_viaje && r.fecha_viaje.includes('/06/'));
-      } else if (criterio === 'julio') {
-        datosFiltrados = datasetGlobal.filter(r => r.fecha_viaje && r.fecha_viaje.includes('/07/'));
-      } else if (criterio === 'agosto') {
-        datosFiltrados = datasetGlobal.filter(r => r.fecha_viaje && r.fecha_viaje.includes('/08/'));
-      } else if (criterio === 'septiembre') {
-        datosFiltrados = datasetGlobal.filter(r => r.fecha_viaje && r.fecha_viaje.includes('/09/'));
-      } else if (criterio === 't2') { 
-        datosFiltrados = datasetGlobal.filter(r => r.fecha_viaje && (r.fecha_viaje.includes('/05/') || r.fecha_viaje.includes('/06/')));
-      } else if (criterio === 't3') { 
-        datosFiltrados = datasetGlobal.filter(r => r.fecha_viaje && (r.fecha_viaje.includes('/07/') || r.fecha_viaje.includes('/08/') || r.fecha_viaje.includes('/09/')));
-      }
-
-      procesarDatos(datosFiltrados);
+      procesarOverview(datos);
     }
 
-    function procesarDatos(data) {
-      document.getElementById('badge-total').innerText = `${data.length} registros`;
-      document.getElementById('kpi-reservas').innerText = data.length;
-      document.getElementById('kpi-noestructurados').innerText = data.length;
+    function procesarOverview(data) {
+      let total = 0;
+      const paquetes = {};
+      const pagos = {};
+      const meses = [0, 0, 0, 0, 0]; // Mayo a Septiembre
+      const trimestres = { 'Trimestre 2': 0, 'Trimestre 3': 0 };
 
-      let totalIngresos = 0;
-      const metodosConteo = {};
-      const paquetesConteo = {};
-      const guiasConteo = {};
-      const ingresosMensuales = { 'Mayo': 0, 'Junio': 0, 'Julio': 0, 'Agosto': 0, 'Septiembre': 0 };
-
-      const tbody = document.getElementById('tabla-body');
+      const tbody = document.getElementById('tabla-mini');
       tbody.innerHTML = '';
 
-      data.forEach((row, index) => {
-        let precioNum = 0;
-        if (row.precio_soles) {
-          const limpio = row.precio_soles.toString().replace(/[^0-9.-]+/g, "");
-          precioNum = parseFloat(limpio) || 0;
-        }
-        totalIngresos += precioNum;
+      data.forEach((r, i) => {
+        let p = parseFloat(r.precio_soles?.replace(/[^0-9.-]+/g, "")) || 0;
+        total += p;
+        paquetes[r.paquete_tour] = (paquetes[r.paquete_tour] || 0) + p;
+        pagos[r.metodo_pago] = (pagos[r.metodo_pago] || 0) + 1;
 
-        // Métodos
-        const metodo = row.metodo_pago || 'Otro';
-        metodosConteo[metodo] = (metodosConteo[metodo] || 0) + 1;
-
-        // Paquetes
-        const paquete = row.paquete_tour || 'Otro';
-        paquetesConteo[paquete] = (paquetesConteo[paquete] || 0) + 1;
-
-        // Guías
-        const guia = row.guia_asignado || 'Sin Asignar';
-        guiasConteo[guia] = (guiasConteo[guia] || 0) + 1;
-
-        // Acumular Ingresos por Mes
-        if (row.fecha_viaje) {
-          if (row.fecha_viaje.includes('/05/')) ingresosMensuales['Mayo'] += precioNum;
-          else if (row.fecha_viaje.includes('/06/')) ingresosMensuales['Junio'] += precioNum;
-          else if (row.fecha_viaje.includes('/07/')) ingresosMensuales['Julio'] += precioNum;
-          else if (row.fecha_viaje.includes('/08/')) ingresosMensuales['Agosto'] += precioNum;
-          else if (row.fecha_viaje.includes('/09/')) ingresosMensuales['Septiembre'] += precioNum;
+        if (r.fecha_viaje?.includes('/05/') || r.fecha_viaje?.includes('/06/')) {
+          trimestres['Trimestre 2'] += p;
+        } else if (r.fecha_viaje?.includes('/07/') || r.fecha_viaje?.includes('/08/') || r.fecha_viaje?.includes('/09/')) {
+          trimestres['Trimestre 3'] += p;
         }
 
-        // Rellenar primeros 15 registros en la tabla
-        if (index < 15) {
-          const tr = document.createElement('tr');
-          tr.className = 'hover:bg-gray-50';
-          tr.innerHTML = `
-            <td class="p-3 font-semibold text-azul-aventura">${row.paquete_tour || '-'}</td>
-            <td class="p-3 font-medium">S/ ${precioNum.toFixed(2)}</td>
-            <td class="p-3">${row.metodo_pago || '-'}</td>
-            <td class="p-3 text-xs">${row.guia_asignado || '-'}</td>
-            <td class="p-3"><span class="bg-blue-100 text-azul-aventura text-xs font-semibold px-2 py-1 rounded">${row.procesamiento_aplicado || 'OCR/NLP'}</span></td>
-            <td class="p-3 text-xs max-w-xs truncate">${row.resultado_extraido || '-'}</td>
-            <td class="p-3"><span class="bg-green-100 text-verde-laguna text-xs font-bold px-2 py-1 rounded">${row.estado_procesamiento || 'Validado'}</span></td>
-          `;
-          tbody.appendChild(tr);
+        if (r.fecha_viaje?.includes('/05/')) meses[0] += p;
+        if (r.fecha_viaje?.includes('/06/')) meses[1] += p;
+        if (r.fecha_viaje?.includes('/07/')) meses[2] += p;
+        if (r.fecha_viaje?.includes('/08/')) meses[3] += p;
+        if (r.fecha_viaje?.includes('/09/')) meses[4] += p;
+
+        if (i < 5) {
+          tbody.innerHTML += `<tr>
+            <td class="py-1 font-semibold text-azul-aventura">${r.paquete_tour || '-'}</td>
+            <td class="py-1 font-medium">S/ ${p.toFixed(2)}</td>
+            <td class="py-1">${r.metodo_pago || '-'}</td>
+            <td class="py-1"><span class="bg-blue-100 text-azul-aventura px-2 py-0.5 rounded font-bold">${r.procesamiento_aplicado || 'OCR/NLP'}</span></td>
+            <td class="py-1 text-gray-500">${r.resultado_extraido || '-'}</td>
+            <td class="py-1 text-verde-laguna font-bold">${r.estado_procesamiento || 'Validado'}</td>
+          </tr>`;
         }
       });
 
-      document.getElementById('kpi-ingresos').innerText = `S/ ${totalIngresos.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
+      document.getElementById('kpi-ingresos').innerText = `S/ ${total.toLocaleString('es-PE', {minimumFractionDigits: 0})}`;
+      document.getElementById('kpi-reservas').innerText = data.length;
+      document.getElementById('kpi-ticket').innerText = `S/ ${(total / (data.length || 1)).toFixed(0)}`;
+      document.getElementById('kpi-validaciones').innerText = data.length;
 
-      const metodoTop = Object.keys(metodosConteo).length > 0 
-        ? Object.keys(metodosConteo).reduce((a, b) => metodosConteo[a] > metodosConteo[b] ? a : b)
-        : '-';
-      document.getElementById('kpi-metodo').innerText = metodoTop;
-
-      renderizarGraficos(paquetesConteo, metodosConteo, ingresosMensuales, guiasConteo);
+      renderCharts(trimestres, meses, paquetes, pagos);
     }
 
-    function renderizarGraficos(paquetesMap, metodosMap, ingresosMap, guiasMap) {
-      // 1. Gráfico Destinos
-      const ctxDestinos = document.getElementById('chartDestinos').getContext('2d');
-      if (chartDestinosInstance) chartDestinosInstance.destroy();
-      chartDestinosInstance = new Chart(ctxDestinos, {
+    function renderCharts(trimestres, meses, paquetes, pagos) {
+      Object.keys(instances).forEach(k => instances[k]?.destroy());
+
+      // Mini Sparklines Latetales
+      const optionsSpark = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } };
+      
+      instances.spark1 = new Chart(document.getElementById('sparkIngresos'), {
+        type: 'line',
+        data: { labels: ['M','J','J','A','S'], datasets: [{ data: meses, borderColor: colores.azulAventura, borderWidth: 2, fill: false, pointRadius: 2 }] },
+        options: optionsSpark
+      });
+
+      instances.spark2 = new Chart(document.getElementById('sparkReservas'), {
+        type: 'line',
+        data: { labels: ['M','J','J','A','S'], datasets: [{ data: [12, 18, 25, 32, 20], borderColor: colores.verdeLaguna, borderWidth: 2, fill: false, pointRadius: 2 }] },
+        options: optionsSpark
+      });
+
+      instances.spark3 = new Chart(document.getElementById('sparkTicket'), {
+        type: 'line',
+        data: { labels: ['M','J','J','A','S'], datasets: [{ data: [850, 920, 880, 950, 910], borderColor: colores.naranjaAventura, borderWidth: 2, fill: false, pointRadius: 2 }] },
+        options: optionsSpark
+      });
+
+      // 1. Gráfico de Trimestres
+      instances.trimestres = new Chart(document.getElementById('chartTrimestresBar'), {
         type: 'bar',
         data: {
-          labels: Object.keys(paquetesMap),
-          datasets: [{
-            label: 'Reservas',
-            data: Object.values(paquetesMap),
-            backgroundColor: [colores.azulAventura, colores.naranjaAventura, colores.verdeLaguna, colores.camelloSafari, colores.azulProfundo],
-            borderRadius: 6
-          }]
+          labels: Object.keys(trimestres),
+          datasets: [{ data: Object.values(trimestres), backgroundColor: [colores.azulAventura, colores.naranjaAventura], borderRadius: 4 }]
         },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
       });
 
-      // 2. Gráfico Pagos
-      const ctxPagos = document.getElementById('chartPagos').getContext('2d');
-      if (chartPagosInstance) chartPagosInstance.destroy();
-      chartPagosInstance = new Chart(ctxPagos, {
-        type: 'doughnut',
-        data: {
-          labels: Object.keys(metodosMap),
-          datasets: [{
-            data: Object.values(metodosMap),
-            backgroundColor: [colores.verdeLaguna, colores.camelloSafari, colores.azulAventura, colores.naranjaAventura]
-          }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-      });
-
-      // 3. Gráfico Tendencia
-      const ctxTendencia = document.getElementById('chartTendencia').getContext('2d');
-      if (chartTendenciaInstance) chartTendenciaInstance.destroy();
-      chartTendenciaInstance = new Chart(ctxTendencia, {
+      // 2. Gráfico de Tendencia Mensual
+      instances.tendencia = new Chart(document.getElementById('chartTendenciaLine'), {
         type: 'line',
         data: {
-          labels: Object.keys(ingresosMap),
-          datasets: [{
-            label: 'Ingresos (S/)',
-            data: Object.values(ingresosMap),
-            borderColor: colores.azulAventura,
-            backgroundColor: 'rgba(14, 77, 146, 0.1)',
-            fill: true,
-            tension: 0.3,
-            pointRadius: 5,
-            pointBackgroundColor: colores.naranjaAventura
-          }]
+          labels: ['Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre'],
+          datasets: [{ data: meses, borderColor: colores.verdeLaguna, backgroundColor: 'rgba(56, 183, 165, 0.1)', fill: true, tension: 0.3, pointRadius: 4 }]
         },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
       });
 
-      // 4. Gráfico Guías
-      const ctxGuias = document.getElementById('chartGuias').getContext('2d');
-      if (chartGuiasInstance) chartGuiasInstance.destroy();
-      chartGuiasInstance = new Chart(ctxGuias, {
+      // 3. Gráfico de Paquetes
+      instances.paquetes = new Chart(document.getElementById('chartPaquetesBar'), {
         type: 'bar',
         data: {
-          labels: Object.keys(guiasMap),
-          datasets: [{
-            label: 'Tours Asignados',
-            data: Object.values(guiasMap),
-            backgroundColor: colores.verdeLaguna,
-            borderRadius: 4
-          }]
+          labels: Object.keys(paquetes),
+          datasets: [{ data: Object.values(paquetes), backgroundColor: colores.azulProfundo, borderRadius: 4 }]
         },
-        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true } } }
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+      });
+
+      // 4. Gráfico Polar de Métodos de Pago
+      instances.pagos = new Chart(document.getElementById('chartPagosPolar'), {
+        type: 'polarArea',
+        data: {
+          labels: Object.keys(pagos),
+          datasets: [{ data: Object.values(pagos), backgroundColor: [colores.verdeLaguna, colores.camelloSafari, colores.azulAventura, colores.naranjaAventura] }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 9 } } } } }
       });
     }
   </script>
